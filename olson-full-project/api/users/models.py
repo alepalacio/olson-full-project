@@ -34,4 +34,4 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         Returns a visualization format from an instance user model.
         """
-        return f"User: {self.username}.  Full name: {self.first_name} {self.last_name}"
+        return f"User: ID: {self.id}.  Username: {self.username}"
