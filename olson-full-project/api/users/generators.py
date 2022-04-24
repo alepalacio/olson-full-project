@@ -1,17 +1,25 @@
 # Random password generator
 
-def get_random_password():
-    import random
-    import string
+class RandomPassword():
 
-    alpha = string.ascii_letters
-    numbers = '0123456789'
-    chars = f"{alpha}{numbers}"
-    pass_length = 15
+    def __init__(self):
+        self.password = self.get_random_password()
+    
+    def get_random_password(self):
+        import random
+        import string
 
-    password = ""
+        alpha = string.ascii_letters
+        numbers = string.digits
+        characters = string.punctuation
+        chars = f"{alpha}{numbers}{characters}"
+        pass_length = 15
+        password = ""
 
-    for char in range(pass_length):
-        password += random.choice(chars)
-    return password
+        for char in range(pass_length):
+            password += random.choice(chars)
+        return password
+
+    def __str__(self):
+        return self.password
 
