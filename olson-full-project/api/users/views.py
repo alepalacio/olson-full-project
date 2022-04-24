@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from users.models import User
-from users.serializers import UserListSerializer, UserCreateSerializer, UserUpdateSerializer, UserChangePasswordSerializer
+from users.serializers import UserListSerializer, UserCreateSerializer, UserUpdateSerializer, UserChangePasswordSerializer, UserResetPasswordSerializer
 
 # Create your views here.
 
@@ -86,3 +86,17 @@ class UserChangePasswordAPIView(APIView):
             return Response('OK', status=status.HTTP_200_OK)
         except:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserResetPasswordAPIView(APIView):
+    def put(self, request, pk):
+        try: 
+            instance = get_object_or_404(User, pk=pk)
+            serializer = UserResetPasswordSerializer(instance, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            data = {
+                "msg":"Successfully password reset. Check your email."
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        except:
+            return Response(serializer.errors)
