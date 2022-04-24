@@ -1,9 +1,24 @@
-from unittest.util import _MAX_LENGTH
-from wsgiref import validate
+from select import select
 from rest_framework import serializers
 from users.models import User
 
-class UserSerializer(serializers.ModelSerializer):
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
+
+    # def to_representation(self, instance):
+    #     print(instance)
+    #     return {
+    #         'username': instance['username'],
+    #         'email': instance['email'],
+    #         'is_active': instance['is_active'],
+    #         'is_verified': instance['is_verified'],
+    #     }
+
+#Custom Serializer for creating data for the first time.
+
+class UserCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
@@ -32,11 +47,15 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def to_representation(self, instance):
+        data = super().to_representation(instance)
         return {
-            'username':instance.username,
-            'email':instance.email
+            'username': data['username'],
+            'email': data['email'],
+            'is_active': data['is_active'],
+            'is_verified': data['is_verified'],
         }
 
+# Using a Serializer for updating data
 
 class UserUpdateSerializer(serializers.Serializer):
 
@@ -53,3 +72,47 @@ class UserUpdateSerializer(serializers.Serializer):
         instance.save()
         return instance
         
+    # def to_representation(self, instance): 
+    #     data = super().to_representation(instance)
+    #     return data
+
+# Using a Model Serializer for updating data
+
+# class UserUpdateSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = '__all__'
+
+
+#     def update(self, instance, validated_data):
+#         data = super().update(instance, validated_data)
+#         data.save()
+#         return data
+
+class UserChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(max_length=100, required=True, write_only=True)
+    password = serializers.CharField(max_length=100, required=True, write_only=True)
+    password2 = serializers.CharField(max_length=100, required=True, write_only=True)
+
+    def validate_old_password(self, value):
+        user = self.instance
+
+        if not user.check_password(value):
+            raise serializers.ValidationError({
+                "msg":"Wrong current password."
+            })
+        return value
+
+    def validate(self, attrs):
+        print(attrs)
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({
+                "msg":"Passwords didn't match.  Try again."
+                })
+        return attrs
+
+
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data['password'])
+        instance.save()
+        return instance
