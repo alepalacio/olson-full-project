@@ -63,7 +63,6 @@ class UserUpdateSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=50)
     last_name = serializers.CharField(max_length=50)
 
-
     def update(self, instance, validated_data):
 
         instance.username = validated_data.get('username', instance.username)
@@ -104,13 +103,11 @@ class UserChangePasswordSerializer(serializers.Serializer):
         return value
 
     def validate(self, attrs):
-        print(attrs)
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({
                 "msg":"Passwords didn't match.  Try again."
-                })
+            })
         return attrs
-
 
     def update(self, instance, validated_data):
         instance.set_password(validated_data['password'])
