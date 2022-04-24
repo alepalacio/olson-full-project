@@ -1,6 +1,7 @@
 from select import select
 from rest_framework import serializers
 from users.models import User
+from users.generators import get_random_password
 
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -113,3 +114,14 @@ class UserChangePasswordSerializer(serializers.Serializer):
         instance.set_password(validated_data['password'])
         instance.save()
         return instance
+
+class UserResetPasswordSerializer(serializers.Serializer):
+
+    def update(self, instance, validated_data):
+        password = get_random_password()
+        instance.set_password(password)
+        instance.save()
+        print(password)
+        return {
+            "new_password": instance
+        }
