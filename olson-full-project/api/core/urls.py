@@ -22,4 +22,5 @@ from core.settings import base
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('users.urls'),),
+    path('pros/', include('sales_prospects.urls'),),
 ] + static(base.STATIC_URL, document_root=base.STATIC_ROOT)
