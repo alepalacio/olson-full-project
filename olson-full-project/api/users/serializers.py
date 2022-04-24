@@ -1,7 +1,9 @@
 from select import select
 from rest_framework import serializers
 from users.models import User
-from users.generators import get_random_password
+from users.generators import RandomPassword
+from users.utils import EmailUtil
+from core.settings import base
 
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -45,6 +47,8 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
+        user.is_active=True
+        user.save()
         return user
 
     def to_representation(self, instance):
@@ -108,6 +112,10 @@ class UserChangePasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError({
                 "msg":"Passwords didn't match.  Try again."
             })
+        password = attrs["password"]
+
+        if len(password) < 6 or len(password) > 20:
+            raise serializers.ValidationError('Password is too short or too long. Minimum 6 characters and no more than 20 characters.')
         return attrs
 
     def update(self, instance, validated_data):
@@ -116,12 +124,26 @@ class UserChangePasswordSerializer(serializers.Serializer):
         return instance
 
 class UserResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=50)
 
     def update(self, instance, validated_data):
-        password = get_random_password()
-        instance.set_password(password)
-        instance.save()
-        print(password)
-        return {
-            "new_password": instance
-        }
+
+        email = validated_data.get('email', None)
+
+        if email is not None:
+            password = RandomPassword()
+            print(password)
+            instance.set_password(password)
+            instance.save()
+            return instance
+
+class UserLoginSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=50, required=True)
+    password = serializers.CharField(max_length=100, required=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "email",
+            "password",
+        ]
