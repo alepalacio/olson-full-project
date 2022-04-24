@@ -15,5 +15,5 @@ class SalesProspectSerializer(serializers.ModelSerializer):
         return attrs
         
     def create(self, validated_data):
-        prospect = SalesProspectProfile(**validated_data)
+        prospect = SalesProspectProfile.objects.create(**validated_data)
         return prospect
